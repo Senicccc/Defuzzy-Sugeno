@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuzzy Sugeno - Keputusan Jumlah Produksi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 992px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        .result-highlight {
+            background-color: #ebf8ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .result-highlight h3 {
+            color: #2b6cb0;
+            margin-top: 0;
+        }
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2b6cb0;
+        }
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+        .chart-container-lg {
+            margin-top: 20px;
+            height: 400px;
+        }
+        .grid-cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .bg-gray-50 {
+            background-color: #f7fafc;
+        }
+        .p-4 {
+            padding: 1rem;
+        }
+        .rounded-md {
+            border-radius: 0.375rem;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .input-error {
+            border-color: #e53e3e;
+        }
+        .rules-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .rules-container {
+                grid-template-columns: 1fr;
+            }
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .surface-plot-container {
+            width: 100%;
+            height: 500px;
+        }
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .tab-button {
+            padding: 8px 16px;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab-button.active {
+            background: #4299e1;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Penerapan Logika Fuzzy Sugeno dalam Keputusan Jumlah Produksi</h1>
+    
+    <div class="container">
+        <!-- Input Parameter -->
+        <div class="card">
+            <h2>Input Parameter</h2>
+            
+            <form id="fuzzyForm">
+                <h3>Rentang Variabel</h3>
+                <div class="grid-cols-2">
+                    <div class="input-group">
+                        <label for="varPermMin">Permintaan Minimum:</label>
+                        <input type="number" id="varPermMin" value="486">
+                        <div id="varPermMinError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="varPermMax">Permintaan Maksimum:</label>
+                        <input type="number" id="varPermMax" value="9868">
+                        <div id="varPermMaxError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="varPersMin">Persediaan Minimum:</label>
+                        <input type="number" id="varPersMin" value="743">
+                        <div id="varPersMinError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="varPersMax">Persediaan Maksimum:</label>
+                        <input type="number" id="varPersMax" value="3761">
+                        <div id="varPersMaxError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="varProdMin">Produksi Minimum:</label>
+                        <input type="number" id="varProdMin" value="1254">
+                        <div id="varProdMinError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="varProdMax">Produksi Maksimum:</label>
+                        <input type="number" id="varProdMax" value="8580">
+                        <div id="varProdMaxError" class="error-message"></div>
+                    </div>
+                </div>
+                
+                <h3>Nilai yang Akan Dihitung</h3>
+                <div class="grid-cols-2">
+                    <div class="input-group">
+                        <label for="permintaanX">Permintaan:</label>
+                        <input type="number" id="permintaanX" value="5823">
+                        <div id="permintaanXError" class="error-message"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="persediaanX">Persediaan:</label>
+                        <input type="number" id="persediaanX" value="2903">
+                        <div id="persediaanXError" class="error-message"></div>
+                    </div>
+                </div>
+                
+                <button type="button" id="calculateBtn">Hitung Fuzzy Sugeno</button>
+            </form>
+        </div>
+        
+        <!-- Hasil Perhitungan -->
+        <div class="card">
+            <h2>Hasil Perhitungan</h2>
+            
+            <div class="bg-gray-50 p-4 rounded-md">
+                <h3>Derajat Keanggotaan</h3>
+                <div class="grid-cols-2">
+                    <div>
+                        <p><strong>Permintaan:</strong></p>
+                        <p>Turun: <span id="permTurun">0.0000</span></p>
+                        <p>Naik: <span id="permNaik">0.0000</span></p>
+                    </div>
+                    <div>
+                        <p><strong>Persediaan:</strong></p>
+                        <p>Sedikit: <span id="persSedikit">0.0000</span></p>
+                        <p>Banyak: <span id="persBanyak">0.0000</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-md" style="margin-top: 20px;">
+                <h3>Aturan Fuzzy</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Aturan</th>
+                            <th class="text-center">α-predikat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>R1</td>
+                            <td>IF Permintaan Turun AND Persediaan Banyak THEN Produksi Berkurang</td>
+                            <td class="text-center" id="nilaiR1">0.0000</td>
+                        </tr>
+                        <tr>
+                            <td>R2</td>
+                            <td>IF Permintaan Turun AND Persediaan Sedikit THEN Produksi Berkurang</td>
+                            <td class="text-center" id="nilaiR2">0.0000</td>
+                        </tr>
+                        <tr>
+                            <td>R3</td>
+                            <td>IF Permintaan Naik AND Persediaan Banyak THEN Produksi Bertambah</td>
+                            <td class="text-center" id="nilaiR3">0.0000</td>
+                        </tr>
+                        <tr>
+                            <td>R4</td>
+                            <td>IF Permintaan Naik AND Persediaan Sedikit THEN Produksi Bertambah</td>
+                            <td class="text-center" id="nilaiR4">0.0000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="result-highlight">
+                <h3>Hasil Defuzzifikasi</h3>
+                <div class="grid-cols-2">
+                    <div>
+                        <p><strong>Produksi Berkurang:</strong></p>
+                        <p id="prodBerkurang">0.0000</p>
+                    </div>
+                    <div>
+                        <p><strong>Produksi Bertambah:</strong></p>
+                        <p id="prodBertambah">0.0000</p>
+                    </div>
+                </div>
+                <p><strong>Nilai Produksi:</strong></p>
+                <p class="result-value" id="nilaiSugeno">0.00</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Visualisasi Fungsi Keanggotaan -->
+    <div class="card">
+        <h2>Visualisasi Fungsi Keanggotaan</h2>
+        
+        <div class="grid-cols-2">
+            <div>
+                <h3>Variabel Permintaan</h3>
+                <div class="chart-container">
+                    <canvas id="permintaanChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <h3>Variabel Persediaan</h3>
+                <div class="chart-container">
+                    <canvas id="persediaanChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualisasi Aturan Fuzzy -->
+    <div class="card">
+        <h2>Visualisasi Aturan Fuzzy</h2>
+        <div class="rules-container">
+            <div>
+                <h3>Kontribusi Aturan</h3>
+                <div class="chart-container">
+                    <canvas id="rulesChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <h3>Diagram Aturan Fuzzy</h3>
+                <div class="chart-container">
+                    <canvas id="rulesPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualisasi Defuzzifikasi -->
+    <div class="card">
+        <h2>Visualisasi Defuzzifikasi</h2>
+        <div class="chart-container-lg">
+            <canvas id="defuzzifikasiChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Visualisasi 3D Surface Plot -->
+    <div class="card">
+        <h2>Visualisasi 3D Hubungan Permintaan-Persediaan-Produksi</h2>
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab('surfacePlotTab')">Surface Plot</button>
+                <button class="tab-button" onclick="openTab('contourPlotTab')">Contour Plot</button>
+            </div>
+            <div id="surfacePlotTab" class="tab-content active">
+                <div id="surfacePlot" class="surface-plot-container"></div>
+            </div>
+            <div id="contourPlotTab" class="tab-content">
+                <div id="contourPlot" class="surface-plot-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel untuk menyimpan chart
+        let permintaanChart, persediaanChart, rulesChart, rulesPieChart, defuzzifikasiChart;
+        
+        // Fungsi untuk tab
+        function openTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Fungsi untuk validasi input
+        function validateInputs() {
+            let isValid = true;
+            
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            document.querySelectorAll('input').forEach(el => el.classList.remove('input-error'));
+            
+            // Validasi rentang variabel
+            const varPermMin = parseFloat(document.getElementById('varPermMin').value);
+            const varPermMax = parseFloat(document.getElementById('varPermMax').value);
+            const varPersMin = parseFloat(document.getElementById('varPersMin').value);
+            const varPersMax = parseFloat(document.getElementById('varPersMax').value);
+            const varProdMin = parseFloat(document.getElementById('varProdMin').value);
+            const varProdMax = parseFloat(document.getElementById('varProdMax').value);
+            
+            // Validasi nilai yang akan dihitung
+            const permintaanX = parseFloat(document.getElementById('permintaanX').value);
+            const persediaanX = parseFloat(document.getElementById('persediaanX').value);
+            
+            // Validasi rentang minimum < maksimum
+            if (varPermMin >= varPermMax) {
+                document.getElementById('varPermMinError').textContent = 'Minimum harus kurang dari maksimum';
+                document.getElementById('varPermMin').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (varPersMin >= varPersMax) {
+                document.getElementById('varPersMinError').textContent = 'Minimum harus kurang dari maksimum';
+                document.getElementById('varPersMin').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (varProdMin >= varProdMax) {
+                document.getElementById('varProdMinError').textContent = 'Minimum harus kurang dari maksimum';
+                document.getElementById('varProdMin').classList.add('input-error');
+                isValid = false;
+            }
+            
+            // Validasi nilai input berada dalam rentang
+            if (permintaanX < varPermMin || permintaanX > varPermMax) {
+                document.getElementById('permintaanXError').textContent = `Nilai harus antara ${varPermMin} dan ${varPermMax}`;
+                document.getElementById('permintaanX').classList.add('input-error');
+                isValid = false;
+            }
+            
+            if (persediaanX < varPersMin || persediaanX > varPersMax) {
+                document.getElementById('persediaanXError').textContent = `Nilai harus antara ${varPersMin} dan ${varPersMax}`;
+                document.getElementById('persediaanX').classList.add('input-error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Fungsi untuk menghitung derajat keanggotaan
+        function hitungDerajatKeanggotaan() {
+            const varPermMin = parseFloat(document.getElementById('varPermMin').value);
+            const varPermMax = parseFloat(document.getElementById('varPermMax').value);
+            const varPersMin = parseFloat(document.getElementById('varPersMin').value);
+            const varPersMax = parseFloat(document.getElementById('varPersMax').value);
+            const permintaanX = parseFloat(document.getElementById('permintaanX').value);
+            const persediaanX = parseFloat(document.getElementById('persediaanX').value);
+            
+            // Hitung derajat keanggotaan permintaan
+            const permTurun = Math.max(0, Math.min(1, (varPermMax - permintaanX) / (varPermMax - varPermMin)));
+            const permNaik = Math.max(0, Math.min(1, (permintaanX - varPermMin) / (varPermMax - varPermMin)));
+            
+            // Hitung derajat keanggotaan persediaan
+            const persSedikit = Math.max(0, Math.min(1, (varPersMax - persediaanX) / (varPersMax - varPersMin)));
+            const persBanyak = Math.max(0, Math.min(1, (persediaanX - varPersMin) / (varPersMax - varPersMin)));
+            
+            // Update tampilan
+            document.getElementById('permTurun').textContent = permTurun.toFixed(4);
+            document.getElementById('permNaik').textContent = permNaik.toFixed(4);
+            document.getElementById('persSedikit').textContent = persSedikit.toFixed(4);
+            document.getElementById('persBanyak').textContent = persBanyak.toFixed(4);
+            
+            return { permTurun, permNaik, persSedikit, persBanyak };
+        }
+        
+        // Fungsi untuk menghitung aturan fuzzy
+        function hitungAturanFuzzy(permTurun, permNaik, persSedikit, persBanyak) {
+            // Hitung nilai α-predikat untuk setiap aturan
+            const nilaiR1 = Math.min(permTurun, persBanyak);
+            const nilaiR2 = Math.min(permTurun, persSedikit);
+            const nilaiR3 = Math.min(permNaik, persBanyak);
+            const nilaiR4 = Math.min(permNaik, persSedikit);
+            
+            // Update tampilan
+            document.getElementById('nilaiR1').textContent = nilaiR1.toFixed(4);
+            document.getElementById('nilaiR2').textContent = nilaiR2.toFixed(4);
+            document.getElementById('nilaiR3').textContent = nilaiR3.toFixed(4);
+            document.getElementById('nilaiR4').textContent = nilaiR4.toFixed(4);
+            
+            return { nilaiR1, nilaiR2, nilaiR3, nilaiR4 };
+        }
+        
+        // Fungsi untuk menghitung hasil inferensi
+        function hitungHasilInferensi(nilaiR1, nilaiR2, nilaiR3, nilaiR4) {
+            // Hitung hasil inferensi
+            const prodBerkurang = Math.min(nilaiR1, nilaiR2);
+            const prodBertambah = Math.max(nilaiR3, nilaiR4);
+            
+            // Update tampilan
+            document.getElementById('prodBerkurang').textContent = prodBerkurang.toFixed(4);
+            document.getElementById('prodBertambah').textContent = prodBertambah.toFixed(4);
+            
+            return { prodBerkurang, prodBertambah };
+        }
+        
+        // Fungsi untuk menghitung defuzzifikasi Sugeno dengan clamping
+        function hitungDefuzzifikasi(prodBerkurang, prodBertambah) {
+            const varProdMin = parseFloat(document.getElementById('varProdMin').value);
+            const varProdMax = parseFloat(document.getElementById('varProdMax').value);
+            
+            const numerator = (prodBerkurang * varProdMin) + (prodBertambah * varProdMax);
+            const denominator = prodBerkurang + prodBertambah;
+            
+            // Clamping nilai Sugeno antara varProdMin dan varProdMax
+            let nilaiSugeno = numerator / denominator;
+            nilaiSugeno = Math.max(varProdMin, Math.min(varProdMax, nilaiSugeno));
+            
+            // Update tampilan
+            document.getElementById('nilaiSugeno').textContent = isNaN(nilaiSugeno) ? '0.00' : nilaiSugeno.toFixed(2);
+            
+            return nilaiSugeno;
+        }
+        
+        // Fungsi untuk mempersiapkan data chart
+        function prepareChartData() {
+            const varPermMin = parseFloat(document.getElementById('varPermMin').value);
+            const varPermMax = parseFloat(document.getElementById('varPermMax').value);
+            const varPersMin = parseFloat(document.getElementById('varPersMin').value);
+            const varPersMax = parseFloat(document.getElementById('varPersMax').value);
+            const varProdMin = parseFloat(document.getElementById('varProdMin').value);
+            const varProdMax = parseFloat(document.getElementById('varProdMax').value);
+            const permintaanX = parseFloat(document.getElementById('permintaanX').value);
+            const persediaanX = parseFloat(document.getElementById('persediaanX').value);
+            
+            // Data untuk chart permintaan
+            const permLabels = [];
+            const permTurunData = [];
+            const permNaikData = [];
+            
+            for (let x = varPermMin; x <= varPermMax; x++) {
+                permLabels.push(x);
+                permTurunData.push(Math.max(0, (varPermMax - x) / (varPermMax - varPermMin)));
+                permNaikData.push(Math.max(0, (x - varPermMin) / (varPermMax - varPermMin)));
+            }
+            
+            // Data untuk chart persediaan
+            const persLabels = [];
+            const persSedikitData = [];
+            const persBanyakData = [];
+            
+            for (let x = varPersMin; x <= varPersMax; x++) {
+                persLabels.push(x);
+                persSedikitData.push(Math.max(0, (varPersMax - x) / (varPersMax - varPersMin)));
+                persBanyakData.push(Math.max(0, (x - varPersMin) / (varPersMax - varPersMin)));
+            }
+            
+            // Data untuk chart defuzzifikasi
+            const defuzzLabels = [];
+            const defuzzBerkurangData = [];
+            const defuzzBertambahData = [];
+            const defuzzCombinedData = [];
+            
+            for (let x = varProdMin; x <= varProdMax; x++) {
+                defuzzLabels.push(x);
+                
+                // Untuk Sugeno, output crisp adalah nilai tertentu (tidak ada fungsi keanggotaan output)
+                // Tapi kita bisa visualisasi bagaimana nilai output dipengaruhi oleh input
+                defuzzBerkurangData.push(x === varProdMin ? 1 : 0);
+                defuzzBertambahData.push(x === varProdMax ? 1 : 0);
+                
+                // Gabungan output (hanya untuk visualisasi)
+                defuzzCombinedData.push(0); // Akan diupdate setelah perhitungan
+            }
+            
+            return {
+                permintaan: {
+                    labels: permLabels,
+                    turun: permTurunData,
+                    naik: permNaikData,
+                    inputX: permintaanX
+                },
+                persediaan: {
+                    labels: persLabels,
+                    sedikit: persSedikitData,
+                    banyak: persBanyakData,
+                    inputX: persediaanX
+                },
+                defuzzifikasi: {
+                    labels: defuzzLabels,
+                    berkurang: defuzzBerkurangData,
+                    bertambah: defuzzBertambahData,
+                    combined: defuzzCombinedData
+                }
+            };
+        }
+        
+        // Fungsi untuk membuat atau memperbarui chart
+        function updateCharts() {
+            const chartData = prepareChartData();
+            const nilaiR1 = parseFloat(document.getElementById('nilaiR1').textContent);
+            const nilaiR2 = parseFloat(document.getElementById('nilaiR2').textContent);
+            const nilaiR3 = parseFloat(document.getElementById('nilaiR3').textContent);
+            const nilaiR4 = parseFloat(document.getElementById('nilaiR4').textContent);
+            const nilaiSugeno = parseFloat(document.getElementById('nilaiSugeno').textContent);
+            
+            // Hancurkan chart yang ada jika sudah ada
+            if (permintaanChart) permintaanChart.destroy();
+            if (persediaanChart) persediaanChart.destroy();
+            if (rulesChart) rulesChart.destroy();
+            if (rulesPieChart) rulesPieChart.destroy();
+            if (defuzzifikasiChart) defuzzifikasiChart.destroy();
+            
+            // Buat chart permintaan
+            const permintaanCtx = document.getElementById('permintaanChart').getContext('2d');
+            permintaanChart = new Chart(permintaanCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.permintaan.labels,
+                    datasets: [
+                        {
+                            label: 'Turun',
+                            data: chartData.permintaan.turun,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Naik',
+                            data: chartData.permintaan.naik,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Nilai Input',
+                            data: [
+                                {x: chartData.permintaan.inputX, y: 0},
+                                {x: chartData.permintaan.inputX, y: 1}
+                            ],
+                            borderColor: 'rgb(0, 0, 0)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            showLine: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Fungsi Keanggotaan Permintaan'
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Nilai Permintaan'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Derajat Keanggotaan'
+                            },
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart persediaan
+            const persediaanCtx = document.getElementById('persediaanChart').getContext('2d');
+            persediaanChart = new Chart(persediaanCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.persediaan.labels,
+                    datasets: [
+                        {
+                            label: 'Sedikit',
+                            data: chartData.persediaan.sedikit,
+                            borderColor: 'rgb(255, 159, 64)',
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Banyak',
+                            data: chartData.persediaan.banyak,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Nilai Input',
+                            data: [
+                                {x: chartData.persediaan.inputX, y: 0},
+                                {x: chartData.persediaan.inputX, y: 1}
+                            ],
+                            borderColor: 'rgb(0, 0, 0)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            showLine: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Fungsi Keanggotaan Persediaan'
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Nilai Persediaan'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Derajat Keanggotaan'
+                            },
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart aturan fuzzy (bar chart)
+            const rulesCtx = document.getElementById('rulesChart').getContext('2d');
+            rulesChart = new Chart(rulesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['R1', 'R2', 'R3', 'R4'],
+                    datasets: [{
+                        label: 'Nilai α-predikat',
+                        data: [nilaiR1, nilaiR2, nilaiR3, nilaiR4],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Nilai α-predikat untuk Setiap Aturan'
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Nilai α-predikat'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Buat pie chart aturan fuzzy
+            const rulesPieCtx = document.getElementById('rulesPieChart').getContext('2d');
+            rulesPieChart = new Chart(rulesPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['R1: Turun & Banyak', 'R2: Turun & Sedikit', 'R3: Naik & Banyak', 'R4: Naik & Sedikit'],
+                    datasets: [{
+                        data: [nilaiR1, nilaiR2, nilaiR3, nilaiR4],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribusi Kontribusi Aturan Fuzzy'
+                        },
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart defuzzifikasi
+            const defuzzifikasiCtx = document.getElementById('defuzzifikasiChart').getContext('2d');
+            defuzzifikasiChart = new Chart(defuzzifikasiCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.defuzzifikasi.labels,
+                    datasets: [
+                        {
+                            label: 'Produksi Berkurang',
+                            data: chartData.defuzzifikasi.berkurang,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Produksi Bertambah',
+                            data: chartData.defuzzifikasi.bertambah,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Hasil Defuzzifikasi',
+                            data: [
+                                {x: nilaiSugeno, y: 0},
+                                {x: nilaiSugeno, y: 1}
+                            ],
+                            borderColor: 'rgb(0, 0, 0)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 5,
+                            pointBackgroundColor: 'red',
+                            fill: false,
+                            showLine: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Visualisasi Defuzzifikasi Sugeno'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 2) {
+                                        return `Hasil: ${nilaiSugeno.toFixed(2)}`;
+                                    }
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Nilai Produksi'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Derajat Keanggotaan'
+                            },
+                            min: 0,
+                            max: 1
+                        }
+                    }
+                }
+            });
+            
+            // Update surface plot
+            updateSurfacePlot();
+        }
+        
+        // Fungsi untuk membuat surface plot
+        function updateSurfacePlot() {
+            const varPermMin = parseFloat(document.getElementById('varPermMin').value);
+            const varPermMax = parseFloat(document.getElementById('varPermMax').value);
+            const varPersMin = parseFloat(document.getElementById('varPersMin').value);
+            const varPersMax = parseFloat(document.getElementById('varPersMax').value);
+            const varProdMin = parseFloat(document.getElementById('varProdMin').value);
+            const varProdMax = parseFloat(document.getElementById('varProdMax').value);
+            
+            // Buat grid data untuk surface plot
+            const permintaanSteps = 20;
+            const persediaanSteps = 20;
+            
+            const permintaanRange = [];
+            const persediaanRange = [];
+            const produksiValues = [];
+            
+            const permStep = (varPermMax - varPermMin) / permintaanSteps;
+            const persStep = (varPersMax - varPersMin) / persediaanSteps;
+            
+            for (let i = 0; i <= permintaanSteps; i++) {
+                permintaanRange.push(varPermMin + i * permStep);
+            }
+            
+            for (let i = 0; i <= persediaanSteps; i++) {
+                persediaanRange.push(varPersMin + i * persStep);
+            }
+            
+            // Hitung nilai produksi untuk setiap kombinasi permintaan dan persediaan
+            for (let i = 0; i <= permintaanSteps; i++) {
+                const row = [];
+                for (let j = 0; j <= persediaanSteps; j++) {
+                    const permintaan = permintaanRange[i];
+                    const persediaan = persediaanRange[j];
+                    
+                    // Hitung derajat keanggotaan
+                    const permTurun = Math.max(0, Math.min(1, (varPermMax - permintaan) / (varPermMax - varPermMin)));
+                    const permNaik = Math.max(0, Math.min(1, (permintaan - varPermMin) / (varPermMax - varPermMin)));
+                    const persSedikit = Math.max(0, Math.min(1, (varPersMax - persediaan) / (varPersMax - varPersMin)));
+                    const persBanyak = Math.max(0, Math.min(1, (persediaan - varPersMin) / (varPersMax - varPersMin)));
+                    
+                    // Hitung aturan fuzzy
+                    const nilaiR1 = Math.min(permTurun, persBanyak);
+                    const nilaiR2 = Math.min(permTurun, persSedikit);
+                    const nilaiR3 = Math.min(permNaik, persBanyak);
+                    const nilaiR4 = Math.min(permNaik, persSedikit);
+                    
+                    // Hitung hasil inferensi
+                    const prodBerkurang = Math.min(nilaiR1, nilaiR2);
+                    const prodBertambah = Math.max(nilaiR3, nilaiR4);
+                    
+                    // Hitung defuzzifikasi
+                    const numerator = (prodBerkurang * varProdMin) + (prodBertambah * varProdMax);
+                    const denominator = prodBerkurang + prodBertambah;
+                    let nilaiSugeno = numerator / denominator;
+                    nilaiSugeno = Math.max(varProdMin, Math.min(varProdMax, nilaiSugeno));
+                    
+                    row.push(nilaiSugeno);
+                }
+                produksiValues.push(row);
+            }
+            
+            // Data untuk surface plot
+            const surfaceData = {
+                type: 'surface',
+                x: persediaanRange,
+                y: permintaanRange,
+                z: produksiValues,
+                colorscale: 'Viridis',
+                contours: {
+                    z: {
+                        show: true,
+                        usecolormap: true,
+                        highlightcolor: "#42f462",
+                        project: {z: true}
+                    }
+                }
+            };
+            
+            const surfaceLayout = {
+                title: 'Surface Plot Hubungan Permintaan-Persediaan-Produksi',
+                scene: {
+                    xaxis: {title: 'Persediaan'},
+                    yaxis: {title: 'Permintaan'},
+                    zaxis: {title: 'Produksi'},
+                    camera: {
+                        eye: {x: 1.5, y: 1.5, z: 1}
+                    }
+                },
+                margin: {
+                    l: 50,
+                    r: 50,
+                    b: 50,
+                    t: 50
+                }
+            };
+            
+            // Data untuk contour plot
+            const contourData = {
+                type: 'contour',
+                x: persediaanRange,
+                y: permintaanRange,
+                z: produksiValues,
+                colorscale: 'Viridis',
+                contours: {
+                    coloring: 'heatmap'
+                }
+            };
+            
+            const contourLayout = {
+                title: 'Contour Plot Hubungan Permintaan-Persediaan-Produksi',
+                xaxis: {title: 'Persediaan'},
+                yaxis: {title: 'Permintaan'},
+                margin: {
+                    l: 50,
+                    r: 50,
+                    b: 50,
+                    t: 50
+                }
+            };
+            
+            // Render plot
+            Plotly.newPlot('surfacePlot', [surfaceData], surfaceLayout);
+            Plotly.newPlot('contourPlot', [contourData], contourLayout);
+        }
+        
+        // Fungsi utama untuk menghitung semua
+        function hitungSemua() {
+            if (!validateInputs()) {
+                return; // Stop jika validasi gagal
+            }
+            
+            const { permTurun, permNaik, persSedikit, persBanyak } = hitungDerajatKeanggotaan();
+            const { nilaiR1, nilaiR2, nilaiR3, nilaiR4 } = hitungAturanFuzzy(permTurun, permNaik, persSedikit, persBanyak);
+            const { prodBerkurang, prodBertambah } = hitungHasilInferensi(nilaiR1, nilaiR2, nilaiR3, nilaiR4);
+            hitungDefuzzifikasi(prodBerkurang, prodBertambah);
+            updateCharts();
+        }
+        
+        // Event listener untuk tombol hitung
+        document.getElementById('calculateBtn').addEventListener('click', hitungSemua);
+        
+        // Jalankan perhitungan pertama kali halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            hitungSemua();
+        });
+    </script>
+</body>
+</html>
