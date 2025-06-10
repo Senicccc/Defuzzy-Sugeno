@@ -13,6 +13,7 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fuzzy Sugeno - Keputusan Jumlah Produksi</title>
+    <link rel="icon" href="../img/favicon.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="../css/form.css">
@@ -44,8 +45,6 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
         </div>
         <?php endif; ?>
 
-<<<<<<< Updated upstream
-=======
         <div class="card" style="background: #fffbe6; border-left: 4px solid #f7b731; margin-bottom: 16px;">
             <h3 style="margin-top:0; color:#b97b00;">Petunjuk Pengisian Input</h3>
             <div style="font-size:1.04em; color:#444;">
@@ -67,7 +66,6 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
             </div>
         </div>
 
->>>>>>> Stashed changes
         <div class="container">
             <!-- Input Parameter -->
             <div class="card">
@@ -87,12 +85,18 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                         <?php 
                         // Data untuk input range
                         $inputRanges = [
-                            ['id' => 'varPermMin', 'label' => 'Permintaan Minimum:', 'value' => 486],
-                            ['id' => 'varPermMax', 'label' => 'Permintaan Maksimum:', 'value' => 9868],
-                            ['id' => 'varPersMin', 'label' => 'Persediaan Minimum:', 'value' => 743],
-                            ['id' => 'varPersMax', 'label' => 'Persediaan Maksimum:', 'value' => 3761],
-                            ['id' => 'varProdMin', 'label' => 'Produksi Minimum:', 'value' => 1254],
-                            ['id' => 'varProdMax', 'label' => 'Produksi Maksimum:', 'value' => 8580]
+                                // ['id' => 'varPermMin', 'label' => 'Permintaan Minimum:', 'value' => 486, 'note' => 'Nilai permintaan terendah yang pernah dicatat dalam periode analisis.'],
+                                // ['id' => 'varPermMax', 'label' => 'Permintaan Maksimum:', 'value' => 9868, 'note' => 'Nilai permintaan tertinggi yang pernah dicapai selama periode analisis.'],
+                                // ['id' => 'varPersMin', 'label' => 'Persediaan Minimum:', 'value' => 743, 'note' => 'Jumlah stok terendah yang tersedia di gudang pada periode tertentu.'],
+                                // ['id' => 'varPersMax', 'label' => 'Persediaan Maksimum:', 'value' => 3761, 'note' => 'Jumlah stok terbanyak yang pernah tersedia di gudang.'],
+                                // ['id' => 'varProdMin', 'label' => 'Produksi Minimum:', 'value' => 1254, 'note' => 'Jumlah produksi paling sedikit yang pernah dilakukan dalam satu periode.'],
+                                // ['id' => 'varProdMax', 'label' => 'Produksi Maksimum:', 'value' => 8580, 'note' => 'Jumlah produksi terbanyak yang pernah dilakukan dalam satu periode.']
+                                ['id' => 'varPermMin', 'label' => 'Permintaan Minimum:', 'value' => 0, 'note' => 'Nilai permintaan terendah yang pernah dicatat dalam periode analisis.'],
+                                ['id' => 'varPermMax', 'label' => 'Permintaan Maksimum:', 'value' => 1, 'note' => 'Nilai permintaan tertinggi yang pernah dicapai selama periode analisis.'],
+                                ['id' => 'varPersMin', 'label' => 'Persediaan Minimum:', 'value' => 0, 'note' => 'Jumlah stok terendah yang tersedia di gudang pada periode tertentu.'],
+                                ['id' => 'varPersMax', 'label' => 'Persediaan Maksimum:', 'value' => 1, 'note' => 'Jumlah stok terbanyak yang pernah tersedia di gudang.'],
+                                ['id' => 'varProdMin', 'label' => 'Produksi Minimum:', 'value' => 0, 'note' => 'Jumlah produksi paling sedikit yang pernah dilakukan dalam satu periode.'],
+                                ['id' => 'varProdMax', 'label' => 'Produksi Maksimum:', 'value' => 1, 'note' => 'Jumlah produksi terbanyak yang pernah dilakukan dalam satu periode.']
                         ];
                         
                         foreach ($inputRanges as $input): ?>
@@ -100,6 +104,7 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                             <label for="<?php echo $input['id']; ?>"><?php echo $input['label']; ?></label>
                             <input type="number" id="<?php echo $input['id']; ?>" min="0" step="1">
                             <div id="<?php echo $input['id']; ?>Error" class="error-message"></div>
+                            <small class="input-note"><?php echo $input['note']; ?></small>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -108,8 +113,10 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                     <div class="grid-cols-2">
                         <?php 
                         $calculationInputs = [
-                            ['id' => 'permintaanX', 'label' => 'Permintaan:', 'value' => 5823],
-                            ['id' => 'persediaanX', 'label' => 'Persediaan:', 'value' => 2903]
+                            // ['id' => 'permintaanX', 'label' => 'Permintaan:', 'value' => 5823, 'note' => 'Masukkan nilai permintaan aktual yang ingin dihitung produksinya.'],
+                            // ['id' => 'persediaanX', 'label' => 'Persediaan:', 'value' => 2903, 'note' => 'Masukkan jumlah stok saat ini untuk perhitungan produksi.']
+                            ['id' => 'permintaanX', 'label' => 'Permintaan:', 'value' => 0, 'note' => 'Masukkan nilai permintaan aktual yang ingin dihitung produksinya.'],
+                            ['id' => 'persediaanX', 'label' => 'Persediaan:', 'value' => 1, 'note' => 'Masukkan jumlah stok saat ini untuk perhitungan produksi.']
                         ];
                         
                         foreach ($calculationInputs as $input): ?>
@@ -117,12 +124,13 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                             <label for="<?php echo $input['id']; ?>"><?php echo $input['label']; ?></label>
                             <input type="number" id="<?php echo $input['id']; ?>" min="0" step="1">
                             <div id="<?php echo $input['id']; ?>Error" class="error-message"></div>
+                            <small class="input-note"><?php echo $input['note']; ?></small>
                         </div>
                         <?php endforeach; ?>
                     </div>
 
                     <div class="button-group">
-                        <button type="button" id="calculateBtn" class="btn-primary">Hitung</button>
+                        <button type="button" id="calculateBtn" class="btn-primary">Hitung Fuzzy Sugeno</button>
 
                         <?php if ($isLoggedIn): ?>
                         <button type="button" id="saveBtn" class="btn-secondary">Simpan Perhitungan</button>
@@ -138,7 +146,7 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
             <div class="card">
                 <h2>Hasil Perhitungan</h2>
 
-                <div class="result-section">
+                <div class="result-section" style="display: none;" id="resultSection">
                     <h3>Derajat Keanggotaan</h3>
                     <div class="grid-cols-2">
                         <div>
@@ -192,10 +200,14 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                         <div>
                             <p><strong>Produksi Berkurang:</strong></p>
                             <p id="prodBerkurang">0.0000</p>
+                            <small class="input-note">* Nilai produksi minimum, diambil dari nilai terendah antara hasil
+                                aturan R1 dan R2.</small>
                         </div>
                         <div>
                             <p><strong>Produksi Bertambah:</strong></p>
                             <p id="prodBertambah">0.0000</p>
+                            <small class="input-note">* Nilai produksi maksimum, diambil dari nilai tertinggi antara
+                                hasil aturan R3 dan R4.</small>
                         </div>
                     </div>
                     <p><strong>Nilai Produksi:</strong></p>
@@ -246,9 +258,12 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
             </div>
         </div>
 
+        <!-- Heatmap Visualisasi -->
+        <div class="card">
+            <h2>Visualisasi Heat Map Permintaan-Persediaan-Produksi</h2>
+            <div id="heatmapPlot" class="surface-plot-container"></div>
+        </div>
 
-<<<<<<< Updated upstream
-=======
         <!-- Disclaimer Visualisasi -->
         <!-- <div class="card" style="background: #fffbe6; border-left: 4px solid #f7b731; margin-bottom: 16px;">
             <h3 style="margin-top:0;">Disclaimer Visualisasi</h3>
@@ -262,7 +277,6 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
                     detail riwayat perhitungan.</em>
             </p>
         </div> -->
->>>>>>> Stashed changes
 
         <!-- Visualisasi 3D Surface Plot -->
         <!-- <div class="card">
@@ -281,16 +295,6 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
             </div>
         </div> -->
 
-        <!-- Disclaimer Visualisasi -->
-        <div class="card" style="background: #fffbe6; border-left: 4px solid #f7b731; margin-bottom: 16px;">
-            <h3 style="margin-top:0;">Disclaimer Visualisasi</h3>
-            <p>
-                <strong>Catatan:</strong> Grafik 3D Surface di bawah ini adalah visualisasi lanjutan yang biasanya digunakan oleh analis atau ahli untuk eksplorasi lebih mendalam. 
-                Jika Anda tidak memahami grafik 3D, tidak perlu khawatir—<b>heatmap di atas sudah cukup mewakili hasil hubungan antara permintaan, persediaan, dan produksi</b>.<br>
-                <br>
-                <em>Fitur 3D Surface hanya tersedia di halaman form penghitungan ini dan tidak muncul pada halaman detail riwayat perhitungan.</em>
-            </p>
-        </div>
 
 
         <script src="../js/form.js"></script>
@@ -423,7 +427,6 @@ $username = $isLoggedIn ? htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'U
             });
         }
 
-        // Generate heatmap saat halaman load dan saat input berubah
         window.addEventListener('DOMContentLoaded', generateHeatmap);
         ['varPermMin', 'varPermMax', 'varPersMin', 'varPersMax'].forEach(id => {
             document.getElementById(id).addEventListener('input', generateHeatmap);

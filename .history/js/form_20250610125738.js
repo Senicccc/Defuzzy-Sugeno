@@ -828,21 +828,18 @@ function hitungSemua() {
 
 // Event listener untuk tombol hitung
 document.getElementById("calculateBtn").addEventListener("click", hitungSemua);
-document.getElementById("saveBtn")?.addEventListener("click", function (e) {
-  // Jalankan perhitungan dulu sebelum simpan
-  hitungSemua();
-
-  // ...lanjutkan proses simpan seperti biasa...
-  // Misal: submit form, AJAX, dsb
-  // Contoh sederhana (jika pakai form submit):
-  // document.getElementById("fuzzyForm").submit();
-});
 
 // Jalankan perhitungan pertama kali halaman dimuat
 document.addEventListener("DOMContentLoaded", function () {
-<<<<<<< Updated upstream
-  // Inisialisasi nilai default jika diperlukan
   if (!document.getElementById("varPermMin").value) {
+    document.getElementById("varPermMin").value = "0";
+    document.getElementById("varPermMax").value = "0";
+    document.getElementById("varPersMin").value = "0";
+    document.getElementById("varPersMax").value = "0";
+    document.getElementById("varProdMin").value = "0";
+    document.getElementById("varProdMax").value = "0";
+    document.getElementById("permintaanX").value = "0";
+    document.getElementById("persediaanX").value = "0";
     document.getElementById("varPermMin").value = "486";
     document.getElementById("varPermMax").value = "9868";
     document.getElementById("varPersMin").value = "743";
@@ -853,25 +850,4 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("persediaanX").value = "2903";
   }
   hitungSemua();
-=======
-  // if (!document.getElementById("varPermMin").value) {
-  //   document.getElementById("varPermMin").value = "0";
-  //   document.getElementById("varPermMax").value = "0";
-  //   document.getElementById("varPersMin").value = "0";
-  //   document.getElementById("varPersMax").value = "0";
-  //   document.getElementById("varProdMin").value = "0";
-  //   document.getElementById("varProdMax").value = "0";
-  //   document.getElementById("permintaanX").value = "0";
-  //   document.getElementById("persediaanX").value = "0";
-  //   document.getElementById("varPermMin").value = "486";
-  //   document.getElementById("varPermMax").value = "9868";
-  //   document.getElementById("varPersMin").value = "743";
-  //   document.getElementById("varPersMax").value = "3761";
-  //   document.getElementById("varProdMin").value = "1254";
-  //   document.getElementById("varProdMax").value = "8580";
-  //   document.getElementById("permintaanX").value = "5823";
-  //   document.getElementById("persediaanX").value = "2903";
-  // }
-  // hitungSemua();
->>>>>>> Stashed changes
 });

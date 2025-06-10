@@ -840,20 +840,6 @@ document.getElementById("saveBtn")?.addEventListener("click", function (e) {
 
 // Jalankan perhitungan pertama kali halaman dimuat
 document.addEventListener("DOMContentLoaded", function () {
-<<<<<<< Updated upstream
-  // Inisialisasi nilai default jika diperlukan
-  if (!document.getElementById("varPermMin").value) {
-    document.getElementById("varPermMin").value = "486";
-    document.getElementById("varPermMax").value = "9868";
-    document.getElementById("varPersMin").value = "743";
-    document.getElementById("varPersMax").value = "3761";
-    document.getElementById("varProdMin").value = "1254";
-    document.getElementById("varProdMax").value = "8580";
-    document.getElementById("permintaanX").value = "5823";
-    document.getElementById("persediaanX").value = "2903";
-  }
-  hitungSemua();
-=======
   // if (!document.getElementById("varPermMin").value) {
   //   document.getElementById("varPermMin").value = "0";
   //   document.getElementById("varPermMax").value = "0";
@@ -873,5 +859,4 @@ document.addEventListener("DOMContentLoaded", function () {
   //   document.getElementById("persediaanX").value = "2903";
   // }
   // hitungSemua();
->>>>>>> Stashed changes
 });
