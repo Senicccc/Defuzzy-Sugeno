@@ -832,10 +832,6 @@ document.getElementById("saveBtn")?.addEventListener("click", function (e) {
   // Jalankan perhitungan dulu sebelum simpan
   hitungSemua();
 
-  // ...lanjutkan proses simpan seperti biasa...
-  // Misal: submit form, AJAX, dsb
-  // Contoh sederhana (jika pakai form submit):
-  // document.getElementById("fuzzyForm").submit();
 });
 
 // Jalankan perhitungan pertama kali halaman dimuat
