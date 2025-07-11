@@ -1,1 +1,1 @@
-live demo: https://fuzzy-production.ct.ws/
+live demo: https://fuzzy-production.ct.ws
